@@ -1,45 +1,23 @@
 import fs from "fs";
-import { join } from "path";
 import "zx/globals";
 
-export interface SearchResult {
-  file: string;
-  lines: Array<{ lineNumber: number; line: string }>;
-}
-
-export interface SearchOptions {
-  wholeWord?: boolean;
-  caseSensitive?: boolean;
-  regex?: boolean;
-}
-
 export default class ProjectSearcher {
-  constructor(private readonly path: string) {}
+  constructor() {}
 
-  public search({
-    files,
-    searchString,
-    options = {},
-  }: {
-    files: string[];
-    searchString: string;
-    options: SearchOptions;
-  }) {
+  search({ files, searchString, options = {} }) {
     return search(files, searchString, options);
   }
 }
 
-export async function search(
-  files: string[],
-  searchString: string,
-  options: SearchOptions
-): Promise<SearchResult[]> {
-  const searchResults: SearchResult[] = [];
+export async function search(files, searchString, options) {
+  const searchResults = [];
 
   files.forEach((file) => {
     const fileContent = fs.readFileSync(file, "utf8");
     const matchingLines = findMatchingLines(fileContent, searchString, options);
+
     if (matchingLines.length > 0) {
+      console.log("we have matches");
       searchResults.push({
         file,
         lines: matchingLines,
@@ -50,11 +28,7 @@ export async function search(
   return searchResults;
 }
 
-function findMatchingLines(
-  fileContents: string,
-  searchString: string,
-  options: SearchOptions
-): Array<{ lineNumber: number; line: string }> {
+function findMatchingLines(fileContents, searchString, options) {
   if (fileContents.trim() === "") {
     return []; // Skip empty file contents
   }
@@ -63,7 +37,7 @@ function findMatchingLines(
 
   const lines = fileContents.split("\n");
 
-  const matchingLines: Array<{ lineNumber: number; line: string }> = [];
+  const matchingLines = [];
 
   lines.forEach((line, index) => {
     const lineNumber = index + 1;
@@ -75,13 +49,21 @@ function findMatchingLines(
     }
 
     if (wholeWord) {
-      const regexPattern = regex
-        ? `\\b${searchString}\\b`
-        : `\\b${escapeRegExp(searchString)}\\b`;
+      const wordBoundary = regex ? "\\b" : "\\b|[^\\w]";
+      const regexPattern = `(${wordBoundary})${escapeRegExp(
+        searchString
+      )}(${wordBoundary})`;
       const regexMatcher = new RegExp(regexPattern, "g");
       if (lineToMatch.match(regexMatcher)) {
         matchingLines.push({ lineNumber, line });
       }
+      // const regexPattern = regex
+      //   ? `\\b${searchString}\\b`
+      //   : `\\b${escapeRegExp(searchString)}\\b`;
+      // const regexMatcher = new RegExp(regexPattern, "g");
+      // if (lineToMatch.match(regexMatcher)) {
+      //   matchingLines.push({ lineNumber, line });
+      // }
     } else {
       if (lineToMatch.includes(searchString)) {
         matchingLines.push({ lineNumber, line });
@@ -92,6 +74,10 @@ function findMatchingLines(
   return matchingLines;
 }
 
-function escapeRegExp(string: string): string {
-  return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+// function escapeRegExp(string) {
+//   return string.replace(/[.*+?^${}()|[\]\\]/g, "\\$&");
+// }
+
+function escapeRegExp(string) {
+  return string.replace(/[.*+?^${}()|[\]\\/@]/g, "\\$&");
 }

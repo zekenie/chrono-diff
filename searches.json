@@ -1,0 +1,16 @@
+{
+  "searches": [
+    {
+      "name": "entities (count files)",
+      "rootDir": "*.entity.ts"
+    },
+    {
+      "name": "check policies (tokens)",
+      "searchString": "CheckPolicies",
+      "options": {
+        "wholeWord": true,
+        "caseSensitive": true
+      }
+    }
+  ]
+}

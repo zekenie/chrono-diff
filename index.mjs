@@ -43,7 +43,7 @@ for (const commit of commitsForEachDay) {
       });
       summary.push({
         fileCount: results.length,
-        tokenCount: results.reduce((sum, match) => sum + match.lines.length, 0),
+        count: results.reduce((sum, match) => sum + match.lines.length, 0),
         date: commit.date,
         searchName: search.name,
         sha: commit.sha,
@@ -51,6 +51,7 @@ for (const commit of commitsForEachDay) {
     } else {
       summary.push({
         fileCount: matchingFiles.length,
+        count: matchingFiles.length,
         date: commit.date,
         searchName: search.name,
         sha: commit.sha,

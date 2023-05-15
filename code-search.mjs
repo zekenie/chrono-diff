@@ -17,7 +17,6 @@ export async function search(files, searchString, options) {
     const matchingLines = findMatchingLines(fileContent, searchString, options);
 
     if (matchingLines.length > 0) {
-      console.log("we have matches");
       searchResults.push({
         file,
         lines: matchingLines,

@@ -5,3 +5,6 @@
 - vis
   - table where dates are columns and rows are search tools
 - [ ] another API to get from vs code would be their find references
+
+https://doc.rust-lang.org/cargo/
+cargo install vl-convert

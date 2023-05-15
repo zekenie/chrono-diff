@@ -43,15 +43,21 @@ for (const commit of commitsForEachDay) {
       });
       summary.push({
         fileCount: results.length,
-        count: results.reduce((sum, match) => sum + match.lines.length, 0),
+        lines: results.reduce((sum, match) => sum + match.lines.length, 0),
         date: commit.date,
         searchName: search.name,
         sha: commit.sha,
       });
     } else {
+      const lines = matchingFiles.reduce((lineCount, file) => {
+        return (
+          lineCount +
+          fs.readFileSync(file, "utf-8").toString().split("\n").length
+        );
+      }, 0);
       summary.push({
         fileCount: matchingFiles.length,
-        count: matchingFiles.length,
+        lines,
         date: commit.date,
         searchName: search.name,
         sha: commit.sha,
@@ -62,7 +68,10 @@ for (const commit of commitsForEachDay) {
 
 console.log(JSON.stringify(summary, null, 2));
 
-await fs.writeJSON("../search-over-time-summary.json", summary);
+await fs.writeJSON("../search-over-time-summary.json", {
+  data: summary,
+  charts: searches.charts,
+});
 
 async function getHeadCommitForEachDay() {
   const commits = [];

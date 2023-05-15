@@ -28,7 +28,7 @@ const commitsForEachDay = await getHeadCommitForEachDay();
 for (const commit of commitsForEachDay) {
   await $`git checkout ${commit.sha}`;
   for (const search of searches.searches) {
-    const matchingFiles = await glob(join(search.rootDir || "**/*"), {
+    const matchingFiles = await glob(join(search.glob || "**/*"), {
       gitignore: true,
     });
     if (search.searchString) {

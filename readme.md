@@ -16,7 +16,7 @@ example search config
   "searches": [
     {
       "name": "object-type",
-      "rootDir": "**/*.ts",
+      "glob": "**/*.ts",
       "searchString": "ObjectType",
       "options": {
         "wholeWord": true,
@@ -25,7 +25,7 @@ example search config
     },
     {
       "name": "nothing-dto ",
-      "rootDir": "**/*.ts",
+      "glob": "**/*.ts",
       "searchString": "NothingDTO",
       "options": {
         "wholeWord": true,
@@ -35,7 +35,7 @@ example search config
 
     {
       "name": "mutations",
-      "rootDir": "**/*.ts",
+      "glob": "**/*.ts",
       "searchString": "@Mutation",
       "options": {
         "wholeWord": true,
@@ -44,7 +44,7 @@ example search config
     },
     {
       "name": "entities",
-      "rootDir": "**/*.entity.ts"
+      "glob": "**/*.entity.ts"
     }
   ],
   "charts": [

@@ -8,3 +8,57 @@
 
 https://doc.rust-lang.org/cargo/
 cargo install vl-convert
+
+example search config
+
+```
+{
+  "searches": [
+    {
+      "name": "object-type",
+      "rootDir": "**/*.ts",
+      "searchString": "ObjectType",
+      "options": {
+        "wholeWord": true,
+        "caseSensitive": true
+      }
+    },
+    {
+      "name": "nothing-dto ",
+      "rootDir": "**/*.ts",
+      "searchString": "NothingDTO",
+      "options": {
+        "wholeWord": true,
+        "caseSensitive": true
+      }
+    },
+
+    {
+      "name": "mutations",
+      "rootDir": "**/*.ts",
+      "searchString": "@Mutation",
+      "options": {
+        "wholeWord": true,
+        "caseSensitive": true
+      }
+    },
+    {
+      "name": "entities",
+      "rootDir": "**/*.entity.ts"
+    }
+  ],
+  "charts": [
+    {
+      "name": "all",
+      "type": "matrix",
+      "searches": ["*"]
+    },
+    {
+      "name": "object-type-vs-mutations",
+      "type": "line",
+      "searches": ["object-type", "mutations"]
+    }
+  ]
+}
+
+```

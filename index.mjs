@@ -1,9 +1,5 @@
 #!/usr/bin/env zx
 
-/**
- * index.mjs --repo git@github.com:get-frank-eng/monorepo.git --lookback 100 --incrementDateBy 15 --searches searches.json
- */
-
 import ProjectSearcher from "./code-search.mjs";
 import { format, addDays, sub } from "date-fns";
 import { join } from "path";

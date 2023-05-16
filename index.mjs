@@ -3,6 +3,7 @@
 import ProjectSearcher from "./code-search.mjs";
 import { format, addDays, sub } from "date-fns";
 import { join } from "path";
+import { readFile } from "./file-access.mjs";
 
 const repo = argv.repo || (await question("What is the repo URL?"));
 const branch = argv.branch || "main";
@@ -19,7 +20,7 @@ await $`rm -rf tmp-repo`;
 await $`git clone ${repo} --branch ${branch} --single-branch tmp-repo`;
 cd("tmp-repo");
 
-const searcher = new ProjectSearcher();
+const searcher = new ProjectSearcher({ readFile });
 
 const summary = [];
 

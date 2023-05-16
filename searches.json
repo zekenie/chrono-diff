@@ -1,8 +1,16 @@
 {
   "searches": [
     {
-      "name": "ObjectType (tokens)",
-      "rootDir": "**/*.ts",
+      "name": "mutation-or-object-type",
+      "glob": "**/*.ts",
+      "searchString": "@ObjectType\\(\\)|@Mutation",
+      "options": {
+        "regex": true
+      }
+    },
+    {
+      "name": "object-type",
+      "glob": "**/*.ts",
       "searchString": "ObjectType",
       "options": {
         "wholeWord": true,
@@ -10,8 +18,8 @@
       }
     },
     {
-      "name": "Nothing DTO ",
-      "rootDir": "**/*.ts",
+      "name": "nothing-dto ",
+      "glob": "**/*.ts",
       "searchString": "NothingDTO",
       "options": {
         "wholeWord": true,
@@ -20,8 +28,8 @@
     },
 
     {
-      "name": "Mutations",
-      "rootDir": "**/*.ts",
+      "name": "mutations",
+      "glob": "**/*.ts",
       "searchString": "@Mutation",
       "options": {
         "wholeWord": true,
@@ -29,8 +37,20 @@
       }
     },
     {
-      "name": "entities (files)",
-      "rootDir": "**/*.entity.ts"
+      "name": "entities",
+      "glob": "**/*.entity.ts"
+    }
+  ],
+  "charts": [
+    {
+      "name": "all",
+      "type": "matrix",
+      "searches": ["*"]
+    },
+    {
+      "name": "object-type-vs-mutations",
+      "type": "line",
+      "searches": ["object-type", "mutations", "mutation-or-object-type"]
     }
   ]
 }

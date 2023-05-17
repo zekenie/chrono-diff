@@ -8,7 +8,10 @@
 - [ ] better to have fewer cli flags and more configs from json (for example repo)
   - [ ] should be able to specify local dir not just remote
   - [ ] should you be able to look at multiple repos and roll them all back?
-- [ ] should be able to specify excluded glob as well
+- [x] should be able to specify excluded glob as well
+- [x] should handle arrays of glob strings
+- [ ] regex and whole word can't actually both be true. bad api
+- [ ] github action to lint these?
 
 https://doc.rust-lang.org/cargo/
 cargo install vl-convert
@@ -20,7 +23,8 @@ example search config
   "searches": [
     {
       "name": "object-type",
-      "glob": "**/*.ts",
+      "glob": ["src/**/*.ts", "spec/**/*.spec.ts"],
+      "ignore": "src/index.ts",
       "searchString": "ObjectType",
       "options": {
         "wholeWord": true,

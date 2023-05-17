@@ -31,9 +31,10 @@ for (const commit of commitsForEachDay) {
   for (const search of searches.searches) {
     const matchingFiles = await glob(join(search.glob || "**/*"), {
       gitignore: true,
+      ignore: search.ignore,
     });
     if (search.searchString) {
-      const results = await searcher.search({
+      const results = searcher.search({
         files: matchingFiles,
         searchString: search.searchString,
         options: search.options,

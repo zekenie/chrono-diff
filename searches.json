@@ -3,6 +3,7 @@
     {
       "name": "mutation-or-object-type",
       "glob": "**/*.ts",
+      "ignore": "src/index.ts",
       "searchString": "@ObjectType\\(\\)|@Mutation",
       "options": {
         "regex": true

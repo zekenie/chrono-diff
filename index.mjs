@@ -1,85 +1,115 @@
 #!/usr/bin/env zx
 
 import ProjectSearcher from "./code-search.mjs";
-import { format, addDays, sub } from "date-fns";
-import { join } from "path";
+import lodash from "lodash";
 import { readFile } from "./file-access.mjs";
+import { cloneRepos, getHeadCommitForEachDay, hashForRepo } from "./clone.mjs";
+import pAll from "p-all";
+import { visualize } from "./visualize.mjs";
 
-const repo = argv.repo || (await question("What is the repo URL?"));
-const branch = argv.branch || "main";
-const lookback = argv.lookback ? Number(argv.lookback) : 30;
-const searchesFilePath = argv.searches;
-const incrementDateBy = argv.incrementDateBy ? Number(argv.incrementDateBy) : 1;
+const inputFiles = await Promise.all(
+  (await glob("inputs/*.json")).map((path) => fs.readJson(path))
+);
 
-const searches = await fs.readJSON(searchesFilePath);
+const allRepos = lodash.flatten(inputFiles.map((input) => input.repos));
 
-const endDate = argv.endDate ? new Date(argv.endDate) : new Date();
-const startDate = sub(endDate, { days: lookback });
+await $`rm -rf tmp-repos`;
+await $`mkdir tmp-repos`;
+cd("tmp-repos");
 
-await $`rm -rf tmp-repo`;
-await $`git clone ${repo} --branch ${branch} --single-branch tmp-repo`;
-cd("tmp-repo");
-
-const searcher = new ProjectSearcher({ readFile });
-
-const summary = [];
-
-const commitsForEachDay = await getHeadCommitForEachDay();
-
-for (const commit of commitsForEachDay) {
-  await $`git checkout ${commit.sha}`;
-  for (const search of searches.searches) {
-    const matchingFiles = await glob(join(search.glob || "**/*"), {
-      gitignore: true,
-      ignore: search.ignore,
-    });
-    if (search.searchString) {
-      const results = searcher.search({
-        files: matchingFiles,
-        searchString: search.searchString,
-        options: search.options,
-      });
-      summary.push({
-        fileCount: results.length,
-        lines: results.reduce((sum, match) => sum + match.lines.length, 0),
-        date: commit.date,
-        searchName: search.name,
-        sha: commit.sha,
-      });
-    } else {
-      const lines = matchingFiles.reduce((lineCount, file) => {
-        return (
-          lineCount +
-          fs.readFileSync(file, "utf-8").toString().split("\n").length
-        );
-      }, 0);
-      summary.push({
-        fileCount: matchingFiles.length,
-        lines,
-        date: commit.date,
-        searchName: search.name,
-        sha: commit.sha,
-      });
-    }
-  }
-}
-
-console.log(JSON.stringify(summary, null, 2));
-
-await fs.writeJSON("../search-over-time-summary.json", {
-  data: summary,
-  charts: searches.charts,
+await cloneRepos({
+  repos: lodash.uniqBy(allRepos, hashForRepo),
 });
 
-async function getHeadCommitForEachDay() {
-  const commits = [];
-  let dateCursor = startDate;
-  while (dateCursor < endDate) {
-    const formattedDate = format(dateCursor, "yyyy-MM-dd");
-    const headCommit =
-      await $`git rev-list -n 1 --before="${formattedDate}" ${branch}`;
-    commits.push({ sha: headCommit.stdout.trim(), date: dateCursor });
-    dateCursor = addDays(dateCursor, incrementDateBy);
+for (const inputFile of inputFiles) {
+  const { startDate, endDate, repos, incrementBy, searches, charts, name } =
+    inputFile;
+
+  const commitLists = await pAll(
+    repos.map(
+      (r) => () =>
+        getHeadCommitForEachDay({
+          repo: r,
+          startDate: new Date(startDate),
+          endDate: endDate ? new Date(endDate) : new Date(),
+          incrementBy,
+        })
+    ),
+    { concurrency: 3 }
+  );
+
+  const processedSearches = await runInputFile({
+    commitLists,
+    charts,
+    repos,
+    searches,
+  });
+
+  cd("..");
+
+  await visualize({ processedSearches, charts, name });
+}
+
+async function runInputFile({ repos, searches, charts, commitLists }) {
+  const searcher = new ProjectSearcher({ readFile });
+
+  const summary = [];
+
+  const reposByName = lodash.keyBy(repos, "name");
+
+  const searchesByRepoHash = lodash.groupBy(searches, (search) => {
+    return hashForRepo(reposByName[search.repo]);
+  });
+
+  console.log({ searchesByRepoHash, reposByName });
+
+  for (const commitList of commitLists) {
+    await within(async () => {
+      cd(`./${commitList.repoHash}`);
+      for (const commit of commitList.commits) {
+        await $`git checkout ${commit.sha}`;
+        for (const search of searchesByRepoHash[commitList.repoHash]) {
+          const globConfig = { gitignore: true };
+          if (search.ignore) {
+            globConfig.ignore = search.ignore;
+          }
+          const matchingFiles = await glob(search.glob || "**/*", globConfig);
+          if (search.searchString) {
+            const results = searcher.search({
+              files: matchingFiles,
+              searchString: search.searchString,
+              options: search.options,
+            });
+            summary.push({
+              repo: commitList.name,
+              fileCount: results.length,
+              lines: results.reduce(
+                (sum, match) => sum + match.lines.length,
+                0
+              ),
+              date: commit.date,
+              searchName: search.name,
+              sha: commit.sha,
+            });
+          } else {
+            const lines = matchingFiles.reduce((lineCount, file) => {
+              return (
+                lineCount +
+                fs.readFileSync(file, "utf-8").toString().split("\n").length
+              );
+            }, 0);
+            summary.push({
+              fileCount: matchingFiles.length,
+              lines,
+              date: commit.date,
+              searchName: search.name,
+              sha: commit.sha,
+            });
+          }
+        }
+      }
+    });
   }
-  return commits;
+
+  return summary;
 }

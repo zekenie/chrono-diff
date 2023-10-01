@@ -2,3 +2,5 @@ node_modules
 .DS_Store
 charts/
 search-over-time-summary.json
+tmp-repos/
+inputs/*

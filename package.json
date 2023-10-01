@@ -5,7 +5,8 @@
   "type": "module",
   "main": "index.js",
   "scripts": {
-    "test": "NODE_OPTIONS=--experimental-vm-modules jest"
+    "test": "NODE_OPTIONS=--experimental-vm-modules jest",
+    "validate-inputs": "z-schema ./input-json-schema.json ./inputs/*.json"
   },
   "keywords": [],
   "author": "",
@@ -21,6 +22,7 @@
     "typescript": "^5.0.4",
     "vega": "^5.25.0",
     "vega-lite": "^5.9.0",
+    "z-schema": "^6.0.1",
     "zx": "^7.2.2"
   },
   "devDependencies": {
